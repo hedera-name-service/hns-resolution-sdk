@@ -1,5 +1,5 @@
 {
-  "name": "hns-resolution-sdk-v2",
+  "name": "@hedera-name-service/hns-resolution-sdk",
   "version": "2.0.0",
   "description": "",
   "main": "dist/index.js",
