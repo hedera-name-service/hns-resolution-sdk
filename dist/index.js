@@ -1,51 +1,43 @@
-import { HASHIO_MAINNET, HASHIO_TESTNET } from "./environmentsVariable/environmentsVariable";
-import { FallBackResolver } from "./helpers/FallbackLogic/FallBackResolver";
-import { Indexer } from "./helpers/IndexerAPI";
-import { MirrorNode } from "./helpers/MirrorNode";
-import { NameHash } from "./types/NameHash";
-import { NetworkType } from "./types/NetworkType";
-import { ResolverConfigs } from "./types/ResolverConfigs";
-import { checkDomainOrNameHashOrTxld } from "./util/checkDomainOrNameHashOrTxld";
-
-export class Resolver {
-    networkType: string;
-    arkhiaUrl: string | undefined;
-    jRpc: string;
-    arkhiaApiValue: string | undefined;
-    mirrorNode: MirrorNode;
-    indexerApi: Indexer;
-    network: string;
-    fallBackResolver: FallBackResolver;
-    constructor(networkType: NetworkType, configs?: ResolverConfigs) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Resolver = void 0;
+const environmentsVariable_1 = require("./environmentsVariable/environmentsVariable");
+const FallBackResolver_1 = require("./helpers/FallbackLogic/FallBackResolver");
+const IndexerAPI_1 = require("./helpers/IndexerAPI");
+const MirrorNode_1 = require("./helpers/MirrorNode");
+const checkDomainOrNameHashOrTxld_1 = require("./util/checkDomainOrNameHashOrTxld");
+class Resolver {
+    constructor(networkType, configs) {
         this.networkType = networkType;
         this.network = //This is temporary until testnet is set up on the indexer
             networkType === `arkhia_test` || networkType === `hedera_test` ? `testnet` : `mainnet`;
-        this.arkhiaUrl = configs?.arkhiaUrl;
+        this.arkhiaUrl = configs === null || configs === void 0 ? void 0 : configs.arkhiaUrl;
         this.jRpc =
-            configs?.jRpc ||
-            (networkType === `arkhia_test` || networkType === `hedera_test`
-                ? HASHIO_TESTNET
-                : HASHIO_MAINNET);
-        this.arkhiaApiValue = configs?.arkhiaApiValue;
-        this.mirrorNode = new MirrorNode(networkType, configs);
-        this.indexerApi = new Indexer(networkType);
-        this.fallBackResolver = new FallBackResolver(networkType, configs);
+            (configs === null || configs === void 0 ? void 0 : configs.jRpc) ||
+                (networkType === `arkhia_test` || networkType === `hedera_test`
+                    ? environmentsVariable_1.HASHIO_TESTNET
+                    : environmentsVariable_1.HASHIO_MAINNET);
+        this.arkhiaApiValue = configs === null || configs === void 0 ? void 0 : configs.arkhiaApiValue;
+        this.mirrorNode = new MirrorNode_1.MirrorNode(networkType, configs);
+        this.indexerApi = new IndexerAPI_1.Indexer(networkType);
+        this.fallBackResolver = new FallBackResolver_1.FallBackResolver(networkType, configs);
     }
-
-    public async resolveSLD(domain: string) {
+    async resolveSLD(domain) {
         try {
             const res = await this.indexerApi.getDomainInfo(domain);
             const d = new Date(0);
             d.setUTCSeconds(res.data.expiration);
             return await Promise.resolve(new Date() < d ? res.data.account_id : ``);
-        } catch (error) {
+        }
+        catch (error) {
             const fallback = await this.fallBackResolver.fallBackResolveSLD(domain);
-            if (fallback) return fallback;
+            if (fallback)
+                return fallback;
             throw new Error(`${domain} has no existing user`);
         }
     }
-    public async getDomainInfo(domainOrNameHashOrTxId: string | NameHash) {
-        const nameHash = await checkDomainOrNameHashOrTxld(domainOrNameHashOrTxId, this.mirrorNode);
+    async getDomainInfo(domainOrNameHashOrTxId) {
+        const nameHash = await (0, checkDomainOrNameHashOrTxld_1.checkDomainOrNameHashOrTxld)(domainOrNameHashOrTxId, this.mirrorNode);
         try {
             const res = await this.indexerApi.getDomainInfo(nameHash.domain);
             const d = new Date(0);
@@ -65,22 +57,26 @@ export class Resolver {
                 },
                 accountId: new Date() < d ? res.data.account_id : ``,
             };
-
             return metadata;
-        } catch (error) {
+        }
+        catch (error) {
             const fallback = await this.fallBackResolver.fallBackGetDomainInfo(nameHash);
-            if (fallback) return fallback;
+            if (fallback)
+                return fallback;
             throw new Error(`${nameHash.domain} has no existing user`);
         }
     }
-    public async getAllDomainsForAccount(accountId: string) {
+    async getAllDomainsForAccount(accountId) {
         try {
             const domains = await this.indexerApi.getAllDomainsAccount(accountId);
             return domains.data;
-        } catch (error) {
+        }
+        catch (error) {
             const fallback = await this.fallBackResolver.fallBackGetAllDomainsForAccount(accountId);
-            if (fallback) return fallback;
+            if (fallback)
+                return fallback;
             throw new Error(`User doesn't have domains`);
         }
     }
 }
+exports.Resolver = Resolver;
