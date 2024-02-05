@@ -68,6 +68,7 @@ export class Resolver {
 
             return metadata;
         } catch (error) {
+            console.log(error);
             const fallback = await this.fallBackResolver.fallBackGetDomainInfo(nameHash);
             if (fallback) return fallback;
             throw new Error(`${nameHash.domain} has no existing user`);

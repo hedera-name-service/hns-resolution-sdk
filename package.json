@@ -1,6 +1,6 @@
 {
   "name": "@hedera-name-service/hns-resolution-sdk",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-alpha.2",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hedera-name-service/hns-resolution-sdk.git"
+    "url": "git+https://github.com/hedera-name-service/hns-resolution-sdk-v2.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": " https://github.com/hedera-name-service/hns-resolution-sdk/issues"
+    "url": " https://github.com/hedera-name-service/hns-resolution-sdk-v2/issues"
   },
-  "homepage": " https://github.com/hedera-name-service/hns-resolution-sdk#readme",
+  "homepage": " https://github.com/hedera-name-service/hns-resolution-sdk-v2#readme",
   "publishConfig": {
     "@hedera-name-service:registry": "https://registry.npmjs.org"
   },

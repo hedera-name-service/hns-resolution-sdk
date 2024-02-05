@@ -60,6 +60,7 @@ class Resolver {
             return metadata;
         }
         catch (error) {
+            console.log(error);
             const fallback = await this.fallBackResolver.fallBackGetDomainInfo(nameHash);
             if (fallback)
                 return fallback;
