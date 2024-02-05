@@ -19,7 +19,7 @@ export const checkDomainOrNameHashOrTxld = async (
         );
     } else if (
         typeof domainOrNameHashOrTxId === `string` &&
-        domainOrNameHashOrTxId.match(/\.[hbar]|\.[boo]|\.[cream]/)
+        domainOrNameHashOrTxId.match(/\.[thbar]|\.[hbar]|\.[boo]|\.[cream]/)
     ) {
         return generateNameHash(domainOrNameHashOrTxId);
     } else if (typeof domainOrNameHashOrTxId === `object` && isNameHash(domainOrNameHashOrTxId)) {

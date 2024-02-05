@@ -12,7 +12,7 @@ const checkDomainOrNameHashOrTxld = async (domainOrNameHashOrTxId, mirrorNode) =
         return (0, generateNameHash_1.generateNameHash)(domainName.newDomain || domainName.extendedDomain || domainName.expiredDomain);
     }
     else if (typeof domainOrNameHashOrTxId === `string` &&
-        domainOrNameHashOrTxId.match(/\.[hbar]|\.[boo]|\.[cream]/)) {
+        domainOrNameHashOrTxId.match(/\.[thbar]|\.[hbar]|\.[boo]|\.[cream]/)) {
         return (0, generateNameHash_1.generateNameHash)(domainOrNameHashOrTxId);
     }
     else if (typeof domainOrNameHashOrTxId === `object` && (0, isNameHash_1.isNameHash)(domainOrNameHashOrTxId)) {
