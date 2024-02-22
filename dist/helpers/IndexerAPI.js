@@ -16,6 +16,10 @@ class Indexer {
         const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/domains?domain=${sld}`);
         return res;
     }
+    async getBlacklistDomains() {
+        const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/blacklist/all`);
+        return res;
+    }
     async getAllDomainsAccount(accountId, page, limit) {
         const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/account/${accountId}`);
         return res;

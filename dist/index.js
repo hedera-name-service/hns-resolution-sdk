@@ -50,7 +50,7 @@ class Resolver {
                     sldHash: res.data.sld_hash,
                 },
                 nftId: `${res.data.token_id}:${res.data.nft_id}`,
-                expiration: new Date() < d ? res.data.expiration * 1000 : null,
+                expiration: new Date() < d ? res.data.expiration : null,
                 provider: res.data.provider,
                 providerData: {
                     contractId: res.data.contract_id,
@@ -77,6 +77,33 @@ class Resolver {
             if (fallback)
                 return fallback;
             throw new Error(`User doesn't have domains`);
+        }
+    }
+    async getBlackList() {
+        try {
+            const domains = await this.indexerApi.getBlacklistDomains();
+            const payload = domains.data.map((i) => {
+                return {
+                    transactionId: i.paymentTransactionId.split(`@`)[1],
+                    nameHash: {
+                        domain: i.sld,
+                        tldHash: i.tldHash,
+                        sldHash: i.sldHash,
+                    },
+                    nftId: i.sldNftId,
+                    expiration: new Date(i.nft.expiration).getTime(),
+                    provider: i.provider,
+                    providerData: {
+                        contractId: i.contractId,
+                    },
+                    accountId: i.nft.ownerAccountId,
+                };
+            });
+            return payload;
+        }
+        catch (error) {
+            console.log(error);
+            throw new Error(`Unable to fetch blacklist`);
         }
     }
 }

@@ -17,4 +17,5 @@ export declare class Resolver {
     resolveSLD(domain: string): Promise<any>;
     getDomainInfo(domainOrNameHashOrTxId: string | NameHash): Promise<any>;
     getAllDomainsForAccount(accountId: string): Promise<Record<string, string>[] | import("./types/DomainInfo").DomainInfo>;
+    getBlackList(): Promise<any>;
 }

@@ -26,3 +26,18 @@ export interface DomainInfo {
     metadata: string;
     modified_timestamp: string;
 }
+export interface DomainMetaData {
+    transactionId: string;
+    nameHash: {
+        domain: string;
+        tld_hash: string;
+        sld_hash: string;
+    };
+    nftId: string;
+    expiration: number;
+    provider: string;
+    providerData: {
+        contractId: string;
+    };
+    accountId: string;
+}
