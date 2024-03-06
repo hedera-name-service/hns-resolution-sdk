@@ -13,7 +13,10 @@ export class MirrorNode {
     tldNames: string[];
     constructor(networkType: NetworkType, configs?: ResolverConfigs) {
         this.baseUrl = getMirrorNodeUrl(networkType, configs?.arkhiaUrl);
-        this.header = { "x-api-key": configs?.arkhiaApiValue || `` };
+        this.header = {
+            "x-api-key": configs?.arkhiaApiValue || ``,
+            "x-api-secret": configs?.arkhiaSecretValue || ``,
+        };
         this.topicId =
             networkType === `arkhia_test` || networkType === `hedera_test`
                 ? TEST_TLD_TOPIC_ID

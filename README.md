@@ -54,6 +54,7 @@ const resolver = new Resolver("arkhia_main", config);
 ResolverConfigs {
     arkhiaUrl?: string;
     arkhiaApiValue?: string;
+    arkhiaSecretValue?: string;
     jRpc?: string;
 }
 ```
@@ -136,6 +137,8 @@ You will need to know the domain name, Hedera transaction ID, or the name hash i
 
 ##### Errors:
 
+`new Error('Not Found')`: This domain is not found (i.e available to purchase)
+
 `new Error('Invalid Input')`: The parameter is formatted incorrectly or incompatible
 
 `new Error('Unable to find metadata')`: The parameter is not yet registered
@@ -169,9 +172,9 @@ const res = await resolver.getBlackList();
     {
         transactionId: '1707334280.338577662',
         nameHash: {
-        domain: 'token.hbar',
-        tldHash: 'f861eb72cf942a90b9f6cfa87c4988a5cbeb2d9f48e5365bd88dbf63091584dc',
-        sldHash: '6fdf284cdf2eb1e636024067437d76d9535a58dfc84c69c4f4eb5948af7ed23d'
+            domain: 'token.hbar',
+            tldHash: 'f861eb72cf942a90b9f6cfa87c4988a5cbeb2d9f48e5365bd88dbf63091584dc',
+            sldHash: '6fdf284cdf2eb1e636024067437d76d9535a58dfc84c69c4f4eb5948af7ed23d'
         },
         nftId: '0.0.1234197:19814',
         expiration: 1738870318000,

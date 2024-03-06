@@ -8,7 +8,10 @@ const getMirrorNodeUrl_1 = require("../util/getMirrorNodeUrl");
 class MirrorNode {
     constructor(networkType, configs) {
         this.baseUrl = (0, getMirrorNodeUrl_1.getMirrorNodeUrl)(networkType, configs === null || configs === void 0 ? void 0 : configs.arkhiaUrl);
-        this.header = { "x-api-key": (configs === null || configs === void 0 ? void 0 : configs.arkhiaApiValue) || `` };
+        this.header = {
+            "x-api-key": (configs === null || configs === void 0 ? void 0 : configs.arkhiaApiValue) || ``,
+            "x-api-secret": (configs === null || configs === void 0 ? void 0 : configs.arkhiaSecretValue) || ``,
+        };
         this.topicId =
             networkType === `arkhia_test` || networkType === `hedera_test`
                 ? topicIds_1.TEST_TLD_TOPIC_ID
