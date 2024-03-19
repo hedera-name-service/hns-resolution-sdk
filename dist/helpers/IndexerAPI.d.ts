@@ -6,6 +6,7 @@ export declare class Indexer {
     network: string;
     constructor(networkType: NetworkType);
     getDomainInfo(sld: string): Promise<AxiosResponse<DomainInfo>>;
+    getProfileMetaData(domain: string): Promise<AxiosResponse>;
     getBlacklistDomains(): Promise<AxiosResponse>;
     getAllDomainsAccount(accountId: string, page?: number, limit?: number): Promise<AxiosResponse<DomainInfo>>;
 }

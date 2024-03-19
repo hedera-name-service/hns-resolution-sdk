@@ -1,6 +1,7 @@
 import { FallBackResolver } from "./helpers/FallbackLogic/FallBackResolver";
 import { Indexer } from "./helpers/IndexerAPI";
 import { MirrorNode } from "./helpers/MirrorNode";
+import { MetadataType } from "./types/Metadata";
 import { NameHash } from "./types/NameHash";
 import { NetworkType } from "./types/NetworkType";
 import { ResolverConfigs } from "./types/ResolverConfigs";
@@ -17,5 +18,6 @@ export declare class Resolver {
     resolveSLD(domain: string): Promise<any>;
     getDomainInfo(domainOrNameHashOrTxId: string | NameHash): Promise<any>;
     getAllDomainsForAccount(accountId: string): Promise<Record<string, string>[] | import("./types/DomainInfo").DomainInfo>;
+    getDomainMetaData(domain: string): Promise<MetadataType>;
     getBlackList(): Promise<any>;
 }

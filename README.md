@@ -185,3 +185,41 @@ const res = await resolver.getBlackList();
   ...
   ]
 ```
+
+### `Resolver.getDomainMetaData`
+
+#### Method:
+
+`getDomainMetaData(): Promise<>`
+
+#### Return:
+
+`Promise<MetadataType>`: An object of the domain's profile metadata
+
+##### Errors:
+
+`new Error(Unable to find domain's metadata)`: Unable to fetch profile metadata
+
+#### Example:
+
+```javascript
+// Initialize the resolver
+const res = await resolver.getDomainMetaData();
+ {
+  domain: '3yrs.cream',
+  eth: '',
+  btc: '',
+  sol: '',
+  avatar: '',
+  twitter: '',
+  email: '',
+  url: '',
+  description: 'testing',
+  keywords: '',
+  discord: '',
+  github: '',
+  reddit: '',
+  telegram: '',
+  extras: ''
+}
+```

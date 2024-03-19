@@ -19,6 +19,10 @@ export class Indexer {
         const res = await sendAxiosGetRequest(`${this.url}/slds/domains?domain=${sld}`);
         return res;
     }
+    async getProfileMetaData(domain: string): Promise<AxiosResponse> {
+        const res = await sendAxiosGetRequest(`${this.url}/metadata/info?domain=${domain}`);
+        return res;
+    }
     async getBlacklistDomains(): Promise<AxiosResponse> {
         const res = await sendAxiosGetRequest(`${this.url}/slds/blacklist/all`);
         return res;

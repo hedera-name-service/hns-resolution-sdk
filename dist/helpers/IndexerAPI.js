@@ -16,6 +16,10 @@ class Indexer {
         const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/domains?domain=${sld}`);
         return res;
     }
+    async getProfileMetaData(domain) {
+        const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/metadata/info?domain=${domain}`);
+        return res;
+    }
     async getBlacklistDomains() {
         const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/blacklist/all`);
         return res;

@@ -79,6 +79,20 @@ class Resolver {
             throw new Error(`User doesn't have domains`);
         }
     }
+    async getDomainMetaData(domain) {
+        try {
+            const { data: metadata } = await this.indexerApi.getProfileMetaData(domain);
+            const results = {
+                domain,
+                ...metadata.addresses,
+                ...metadata.textRecord,
+            };
+            return results;
+        }
+        catch (error) {
+            throw new Error(`Unable to find domain's metadata`);
+        }
+    }
     async getBlackList() {
         try {
             const domains = await this.indexerApi.getBlacklistDomains();

@@ -2,6 +2,7 @@ import { HASHIO_MAINNET, HASHIO_TESTNET } from "./environmentsVariable/environme
 import { FallBackResolver } from "./helpers/FallbackLogic/FallBackResolver";
 import { Indexer } from "./helpers/IndexerAPI";
 import { MirrorNode } from "./helpers/MirrorNode";
+import { MetadataType } from "./types/Metadata";
 import { NameHash } from "./types/NameHash";
 import { NetworkType } from "./types/NetworkType";
 import { ResolverConfigs } from "./types/ResolverConfigs";
@@ -82,6 +83,21 @@ export class Resolver {
             const fallback = await this.fallBackResolver.fallBackGetAllDomainsForAccount(accountId);
             if (fallback) return fallback;
             throw new Error(`User doesn't have domains`);
+        }
+    }
+    public async getDomainMetaData(domain: string): Promise<MetadataType> {
+        try {
+            const { data: metadata } = await this.indexerApi.getProfileMetaData(domain);
+
+            const results = {
+                domain,
+                ...metadata.addresses,
+                ...metadata.textRecord,
+            };
+
+            return results;
+        } catch (error) {
+            throw new Error(`Unable to find domain's metadata`);
         }
     }
     public async getBlackList() {
