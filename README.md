@@ -190,7 +190,7 @@ const res = await resolver.getBlackList();
 
 #### Method:
 
-`getDomainMetaData(): Promise<>`
+`getDomainMetaData(domain: string): Promise<MetadataType>`
 
 #### Return:
 
@@ -204,7 +204,7 @@ const res = await resolver.getBlackList();
 
 ```javascript
 // Initialize the resolver
-const res = await resolver.getDomainMetaData();
+const res = await resolver.getDomainMetaData("3yrs.cream");
  {
   domain: '3yrs.cream',
   eth: '',
