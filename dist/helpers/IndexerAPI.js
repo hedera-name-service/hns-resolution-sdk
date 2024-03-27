@@ -12,6 +12,10 @@ class Indexer {
         this.network =
             networkType === `arkhia_test` || networkType === `hedera_test` ? `testnet` : `mainnet`;
     }
+    async getIndexerHealth() {
+        const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}`);
+        return res.data;
+    }
     async getDomainInfo(sld) {
         const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/domains?domain=${sld}`);
         return res;
@@ -24,7 +28,7 @@ class Indexer {
         const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/blacklist/all`);
         return res;
     }
-    async getAllDomainsAccount(accountId, page, limit) {
+    async getAllDomainsAccount(accountId) {
         const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/account/${accountId}`);
         return res;
     }

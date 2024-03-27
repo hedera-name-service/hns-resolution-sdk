@@ -6,6 +6,7 @@ const FallBackResolver_1 = require("./helpers/FallbackLogic/FallBackResolver");
 const IndexerAPI_1 = require("./helpers/IndexerAPI");
 const MirrorNode_1 = require("./helpers/MirrorNode");
 const checkDomainOrNameHashOrTxld_1 = require("./util/checkDomainOrNameHashOrTxld");
+const validateDomain_1 = require("./util/validateDomain");
 class Resolver {
     constructor(networkType, configs) {
         this.networkType = networkType;
@@ -23,61 +24,92 @@ class Resolver {
         this.fallBackResolver = new FallBackResolver_1.FallBackResolver(networkType, configs);
     }
     async resolveSLD(domain) {
-        try {
-            const res = await this.indexerApi.getDomainInfo(domain);
-            const d = new Date(0);
-            d.setUTCSeconds(res.data.expiration);
-            return await Promise.resolve(new Date() < d ? res.data.account_id : ``);
+        const checkDomain = (0, validateDomain_1.validateDomain)(domain);
+        const health = await this.indexerApi.getIndexerHealth();
+        if (!checkDomain) {
+            throw new Error(`Not a valid domain`);
         }
-        catch (error) {
-            const fallback = await this.fallBackResolver.fallBackResolveSLD(domain);
-            if (fallback)
-                return fallback;
-            throw new Error(`${domain} has no existing user`);
+        if (health) {
+            try {
+                const res = await this.indexerApi.getDomainInfo(domain);
+                const d = new Date(0);
+                d.setUTCSeconds(res.data.expiration);
+                return await Promise.resolve(new Date() < d ? res.data.account_id : undefined);
+            }
+            catch (error) {
+                return undefined;
+            }
         }
+        else {
+            try {
+                const fallback = await this.fallBackResolver.fallBackResolveSLD(domain);
+                if (fallback)
+                    return fallback;
+            }
+            catch (error) {
+                return undefined;
+            }
+        }
+        throw new Error(`Unable to query`);
     }
     async getDomainInfo(domainOrNameHashOrTxId) {
         const nameHash = await (0, checkDomainOrNameHashOrTxld_1.checkDomainOrNameHashOrTxld)(domainOrNameHashOrTxId, this.mirrorNode);
-        try {
-            const res = await this.indexerApi.getDomainInfo(nameHash.domain);
-            const d = new Date(0);
-            d.setUTCSeconds(res.data.expiration);
-            const metadata = {
-                transactionId: res.data.paymenttransaction_id.split(`@`)[1],
-                nameHash: {
-                    domain: res.data.domain,
-                    tldHash: res.data.tld_hash,
-                    sldHash: res.data.sld_hash,
-                },
-                nftId: `${res.data.token_id}:${res.data.nft_id}`,
-                expiration: new Date() < d ? res.data.expiration : null,
-                provider: res.data.provider,
-                providerData: {
-                    contractId: res.data.contract_id,
-                },
-                accountId: new Date() < d ? res.data.account_id : ``,
-            };
-            return metadata;
+        const health = await this.indexerApi.getIndexerHealth();
+        if (health) {
+            try {
+                const res = await this.indexerApi.getDomainInfo(nameHash.domain);
+                const d = new Date(0);
+                d.setUTCSeconds(res.data.expiration);
+                const metadata = {
+                    transactionId: res.data.paymenttransaction_id.split(`@`)[1],
+                    nameHash: {
+                        domain: res.data.domain,
+                        tldHash: res.data.tld_hash,
+                        sldHash: res.data.sld_hash,
+                    },
+                    nftId: `${res.data.token_id}:${res.data.nft_id}`,
+                    expiration: new Date() < d ? res.data.expiration : null,
+                    provider: res.data.provider,
+                    providerData: {
+                        contractId: res.data.contract_id,
+                    },
+                    accountId: new Date() < d ? res.data.account_id : ``,
+                };
+                return metadata;
+            }
+            catch (error) {
+                throw new Error(`Not Found`);
+            }
         }
-        catch (error) {
-            console.log(error);
-            const fallback = await this.fallBackResolver.fallBackGetDomainInfo(nameHash);
-            if (fallback)
-                return fallback;
-            throw new Error(`${nameHash.domain} has no existing user`);
+        else {
+            try {
+                const fallback = await this.fallBackResolver.fallBackGetDomainInfo(nameHash);
+                if (fallback)
+                    return fallback;
+            }
+            catch (error) {
+                throw new Error(`Not Found`);
+            }
         }
+        throw new Error(`Unable to query`);
     }
     async getAllDomainsForAccount(accountId) {
+        const health = await this.indexerApi.getIndexerHealth();
         try {
-            const domains = await this.indexerApi.getAllDomainsAccount(accountId);
-            return domains.data;
+            if (health) {
+                const domains = await this.indexerApi.getAllDomainsAccount(accountId);
+                return domains.data;
+            }
+            else {
+                const fallback = await this.fallBackResolver.fallBackGetAllDomainsForAccount(accountId);
+                if (fallback)
+                    return fallback;
+            }
         }
         catch (error) {
-            const fallback = await this.fallBackResolver.fallBackGetAllDomainsForAccount(accountId);
-            if (fallback)
-                return fallback;
-            throw new Error(`User doesn't have domains`);
+            return [];
         }
+        throw new Error(`Unable to query`);
     }
     async getDomainMetaData(domain) {
         try {
@@ -90,7 +122,7 @@ class Resolver {
             return results;
         }
         catch (error) {
-            throw new Error(`Unable to find domain's metadata`);
+            throw new Error(`Unable to find domain's profile metadata`);
         }
     }
     async getBlackList() {
@@ -116,7 +148,6 @@ class Resolver {
             return payload;
         }
         catch (error) {
-            console.log(error);
             throw new Error(`Unable to fetch blacklist`);
         }
     }

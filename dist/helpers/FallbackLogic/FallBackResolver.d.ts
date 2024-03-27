@@ -9,7 +9,7 @@ export declare class FallBackResolver {
     arkhiaApiValue: string | undefined;
     mirrorNode: MirrorNode;
     constructor(networkType: NetworkType, configs?: ResolverConfigs);
-    fallBackResolveSLD(domain: string): Promise<any>;
+    fallBackResolveSLD(domain: string): Promise<string>;
     fallBackGetDomainInfo(nameHash: NameHash): Promise<any>;
     fallBackGetAllDomainsForAccount(accountId: string): Promise<Record<string, string>[]>;
     private getAccountInfo;

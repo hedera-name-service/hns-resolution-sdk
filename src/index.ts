@@ -2,21 +2,24 @@ import { HASHIO_MAINNET, HASHIO_TESTNET } from "./environmentsVariable/environme
 import { FallBackResolver } from "./helpers/FallbackLogic/FallBackResolver";
 import { Indexer } from "./helpers/IndexerAPI";
 import { MirrorNode } from "./helpers/MirrorNode";
+import { DomainInfo } from "./types/DomainInfo";
+import { IndexerDomainInfo } from "./types/IndexerTypes";
 import { MetadataType } from "./types/Metadata";
 import { NameHash } from "./types/NameHash";
 import { NetworkType } from "./types/NetworkType";
 import { ResolverConfigs } from "./types/ResolverConfigs";
 import { checkDomainOrNameHashOrTxld } from "./util/checkDomainOrNameHashOrTxld";
+import { validateDomain } from "./util/validateDomain";
 
 export class Resolver {
+    private mirrorNode: MirrorNode;
+    private indexerApi: Indexer;
+    private fallBackResolver: FallBackResolver;
     networkType: string;
-    arkhiaUrl: string | undefined;
-    jRpc: string;
-    arkhiaApiValue: string | undefined;
-    mirrorNode: MirrorNode;
-    indexerApi: Indexer;
     network: string;
-    fallBackResolver: FallBackResolver;
+    arkhiaUrl?: string;
+    jRpc?: string;
+    arkhiaApiValue: string | undefined;
     constructor(networkType: NetworkType, configs?: ResolverConfigs) {
         this.networkType = networkType;
         this.network = //This is temporary until testnet is set up on the indexer
@@ -33,63 +36,101 @@ export class Resolver {
         this.fallBackResolver = new FallBackResolver(networkType, configs);
     }
 
-    public async resolveSLD(domain: string) {
-        try {
-            const res = await this.indexerApi.getDomainInfo(domain);
-            const d = new Date(0);
-            d.setUTCSeconds(res.data.expiration);
-            return await Promise.resolve(new Date() < d ? res.data.account_id : ``);
-        } catch (error) {
-            const fallback = await this.fallBackResolver.fallBackResolveSLD(domain);
-            if (fallback) return fallback;
-            throw new Error(`${domain} has no existing user`);
-        }
-    }
-    public async getDomainInfo(domainOrNameHashOrTxId: string | NameHash) {
-        const nameHash = await checkDomainOrNameHashOrTxld(domainOrNameHashOrTxId, this.mirrorNode);
-        try {
-            const res = await this.indexerApi.getDomainInfo(nameHash.domain);
-            const d = new Date(0);
-            d.setUTCSeconds(res.data.expiration);
-            const metadata = {
-                transactionId: res.data.paymenttransaction_id.split(`@`)[1],
-                nameHash: {
-                    domain: res.data.domain,
-                    tldHash: res.data.tld_hash,
-                    sldHash: res.data.sld_hash,
-                },
-                nftId: `${res.data.token_id}:${res.data.nft_id}`,
-                expiration: new Date() < d ? res.data.expiration : null,
-                provider: res.data.provider,
-                providerData: {
-                    contractId: res.data.contract_id,
-                },
-                accountId: new Date() < d ? res.data.account_id : ``,
-            };
+    public async resolveSLD(domain: string): Promise<string | undefined> {
+        const checkDomain = validateDomain(domain);
+        const health = await this.indexerApi.getIndexerHealth();
 
-            return metadata;
-        } catch (error) {
-            console.log(error);
-            const fallback = await this.fallBackResolver.fallBackGetDomainInfo(nameHash);
-            if (fallback) return fallback;
-            throw new Error(`${nameHash.domain} has no existing user`);
+        if (!checkDomain) {
+            throw new Error(`Not a valid domain`);
         }
+
+        if (health) {
+            try {
+                const res = await this.indexerApi.getDomainInfo(domain);
+                const d = new Date(0);
+                d.setUTCSeconds(res.data.expiration);
+                return await Promise.resolve(new Date() < d ? res.data.account_id : undefined);
+            } catch (error) {
+                return undefined;
+            }
+        } else {
+            try {
+                const fallback = await this.fallBackResolver.fallBackResolveSLD(domain);
+                if (fallback) return fallback;
+            } catch (error) {
+                return undefined;
+            }
+        }
+
+        throw new Error(`Unable to query`);
     }
-    public async getAllDomainsForAccount(accountId: string) {
-        try {
-            const domains = await this.indexerApi.getAllDomainsAccount(accountId);
-            return domains.data;
-        } catch (error) {
-            const fallback = await this.fallBackResolver.fallBackGetAllDomainsForAccount(accountId);
-            if (fallback) return fallback;
-            throw new Error(`User doesn't have domains`);
+    public async getDomainInfo(
+        domainOrNameHashOrTxId: NameHash | string,
+    ): Promise<DomainInfo | undefined> {
+        const nameHash = await checkDomainOrNameHashOrTxld(domainOrNameHashOrTxId, this.mirrorNode);
+        const health = await this.indexerApi.getIndexerHealth();
+        if (health) {
+            try {
+                const res = await this.indexerApi.getDomainInfo(nameHash.domain);
+                const d = new Date(0);
+                d.setUTCSeconds(res.data.expiration);
+                const metadata: DomainInfo = {
+                    transactionId: res.data.paymenttransaction_id.split(`@`)[1],
+                    nameHash: {
+                        domain: res.data.domain,
+                        tldHash: res.data.tld_hash,
+                        sldHash: res.data.sld_hash,
+                    },
+                    nftId: `${res.data.token_id}:${res.data.nft_id}`,
+                    expiration: new Date() < d ? res.data.expiration : null,
+                    provider: res.data.provider,
+                    providerData: {
+                        contractId: res.data.contract_id,
+                    },
+                    accountId: new Date() < d ? res.data.account_id : ``,
+                };
+
+                return metadata;
+            } catch (error) {
+                throw new Error(`Not Found`);
+            }
+        } else {
+            try {
+                const fallback: DomainInfo =
+                    await this.fallBackResolver.fallBackGetDomainInfo(nameHash);
+                if (fallback) return fallback;
+            } catch (error) {
+                throw new Error(`Not Found`);
+            }
         }
+
+        throw new Error(`Unable to query`);
+    }
+    public async getAllDomainsForAccount(
+        accountId: string,
+    ): Promise<IndexerDomainInfo[] | Record<string, string>[]> {
+        const health = await this.indexerApi.getIndexerHealth();
+
+        try {
+            if (health) {
+                const domains = await this.indexerApi.getAllDomainsAccount(accountId);
+                return domains.data;
+            } else {
+                const fallback =
+                    await this.fallBackResolver.fallBackGetAllDomainsForAccount(accountId);
+                if (fallback) return fallback;
+            }
+        } catch (error) {
+            return [];
+        }
+
+        throw new Error(`Unable to query`);
     }
     public async getDomainMetaData(domain: string): Promise<MetadataType> {
         try {
             const { data: metadata } = await this.indexerApi.getProfileMetaData(domain);
 
-            const results = {
+            const results: MetadataType = {
                 domain,
                 ...metadata.addresses,
                 ...metadata.textRecord,
@@ -97,10 +138,10 @@ export class Resolver {
 
             return results;
         } catch (error) {
-            throw new Error(`Unable to find domain's metadata`);
+            throw new Error(`Unable to find domain's profile metadata`);
         }
     }
-    public async getBlackList() {
+    public async getBlackList(): Promise<DomainInfo[]> {
         try {
             const domains = await this.indexerApi.getBlacklistDomains();
             const payload = domains.data.map((i) => {
@@ -122,7 +163,6 @@ export class Resolver {
             });
             return payload;
         } catch (error) {
-            console.log(error);
             throw new Error(`Unable to fetch blacklist`);
         }
     }
