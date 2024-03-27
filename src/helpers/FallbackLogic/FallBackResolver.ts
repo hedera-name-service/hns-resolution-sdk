@@ -23,7 +23,7 @@ export class FallBackResolver {
         this.mirrorNode = new MirrorNode(networkType, configs);
     }
 
-    async fallBackResolveSLD(domain: string) {
+    async fallBackResolveSLD(domain: string): Promise<string> {
         const nameHash = hashDomain(domain);
         const domainTopicMessage = await this.mirrorNode.getTopicMessage(nameHash);
         const contractEVM = await this.mirrorNode.getContractEvmAddress(
@@ -38,7 +38,9 @@ export class FallBackResolver {
             domainTopicMessage.tokenId,
         );
 
-        return Promise.resolve(foundData && new Date() < foundData.date ? nftInfo.account_id : ``);
+        return Promise.resolve(
+            foundData && new Date() < foundData.date ? nftInfo.account_id : undefined,
+        );
     }
     async fallBackGetDomainInfo(nameHash: NameHash) {
         const domainTopicMessage = await this.mirrorNode.getTopicMessage(nameHash);
@@ -58,7 +60,7 @@ export class FallBackResolver {
             domainTopicMessage.topicId,
             nftInfo,
         );
-        if (nftDataTopicMessage.length === 0) throw new Error(`Unable to Find MetaData`);
+        if (nftDataTopicMessage.length === 0) throw new Error(`Not Found`);
         const final = JSON.parse(Buffer.from(nftDataTopicMessage[0].message, `base64`).toString());
 
         final.accountId = !foundData || new Date() < foundData.date ? nftInfo.account_id : ``;

@@ -25,7 +25,7 @@ class FallBackResolver {
         if (contractList.length === 0)
             throw Error(`No Contract Address`);
         const { foundData, nftInfo } = await this.getAccountInfo(contractList, nameHash, domainTopicMessage.tokenId);
-        return Promise.resolve(foundData && new Date() < foundData.date ? nftInfo.account_id : ``);
+        return Promise.resolve(foundData && new Date() < foundData.date ? nftInfo.account_id : undefined);
     }
     async fallBackGetDomainInfo(nameHash) {
         const domainTopicMessage = await this.mirrorNode.getTopicMessage(nameHash);
@@ -37,7 +37,7 @@ class FallBackResolver {
         const { foundData, nftInfo } = await this.getAccountInfo(contractList, nameHash, domainTopicMessage.tokenId);
         const nftDataTopicMessage = await this.mirrorNode.getNftInfoTopicMessage(domainTopicMessage.topicId, nftInfo);
         if (nftDataTopicMessage.length === 0)
-            throw new Error(`Unable to Find MetaData`);
+            throw new Error(`Not Found`);
         const final = JSON.parse(Buffer.from(nftDataTopicMessage[0].message, `base64`).toString());
         final.accountId = !foundData || new Date() < foundData.date ? nftInfo.account_id : ``;
         final.expiration =

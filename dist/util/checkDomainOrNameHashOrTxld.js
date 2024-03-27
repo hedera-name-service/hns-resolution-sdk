@@ -4,6 +4,7 @@ exports.checkDomainOrNameHashOrTxld = void 0;
 const formatHederaTxId_1 = require("./formatHederaTxId");
 const generateNameHash_1 = require("./generateNameHash");
 const isNameHash_1 = require("./isNameHash");
+const validateDomain_1 = require("./validateDomain");
 const checkDomainOrNameHashOrTxld = async (domainOrNameHashOrTxId, mirrorNode) => {
     if (typeof domainOrNameHashOrTxId === `string` &&
         domainOrNameHashOrTxId.match(/[0-9].[0-9].[0-9]{1,7}@[0-9]{1,10}.[0-9]{1,9}/)) {
@@ -13,6 +14,9 @@ const checkDomainOrNameHashOrTxld = async (domainOrNameHashOrTxId, mirrorNode) =
     }
     else if (typeof domainOrNameHashOrTxId === `string` &&
         domainOrNameHashOrTxId.match(/\.[thbar]|\.[hbar]|\.[boo]|\.[cream]/)) {
+        const checkDomain = (0, validateDomain_1.validateDomain)(domainOrNameHashOrTxId);
+        if (!checkDomain)
+            throw new Error(`Invalid Input`);
         return (0, generateNameHash_1.generateNameHash)(domainOrNameHashOrTxId);
     }
     else if (typeof domainOrNameHashOrTxId === `object` && (0, isNameHash_1.isNameHash)(domainOrNameHashOrTxId)) {

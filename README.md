@@ -11,7 +11,7 @@ Domains can have many types of data associated with them; the most common is cry
 Install the SDK. There are no additional peer dependencies required at this time.
 
 ```
-npm install @hedera-name-service/@hedera-name-service/hns-resolution-sdk
+npm install @hedera-name-service/hns-resolution-sdk
 ```
 
 ### Initialization
@@ -48,7 +48,7 @@ import { Resolver } from "@hedera-name-service/hns-resolution-sdk";
 const resolver = new Resolver("arkhia_main", config);
 ```
 
-**Note:**: Config is an object to put keys it consistent of the following:
+**Note:** Config is an object to put keys it consistent of the following:
 
 ```javascript
 ResolverConfigs {
@@ -63,34 +63,6 @@ ResolverConfigs {
 
 **Note:** There is an env.example with setup example for easy set up for developers
 
-### Resolving Domains from Account IDs
-
-HNS supports reverse resolution to all applications to display HNS names in place of Hedera Account IDs or other data associated with the HNS name(s).
-
-> HNS does not enforce the accuracy of reverse records - for instance, anyone may claim that the name for their address is `hns.hbar`. To be certain that the claim is correct, you must always perform the reverse resolution and render the returned value(s).
-
-#### `Resolver.getAllDomainsForAccount`
-
-#### Method:
-
-`getAllDomainsForAccount(accountId: string): Promise<string[]>`
-
-#### Parameter:
-
-`accountId: string`: A Hedera Account ID in the format of `0.0.<Account>`. Read the docs on [Hedera Account IDs](https://docs.hedera.com/hedera/core-concepts/accounts/account-properties#account-id) for more info.
-
-#### Return:
-
-`Promise<string[]>`: An array of domains that the the specified `accountId` owns or maps to. The method will return an empty array the `accountId` does not own or resolve to any domains.
-
-#### Example:
-
-```javascript
-// Initialize the resolver
-const res = await resolver.getAllDomainsForAccount(`0.0.800`);
-// []
-```
-
 ### Resolving domain names
 
 Domains can have many types of data associated with them; the most common is cryptocurrency addresses, or in the context of Hedera, account IDs. HNS supports storing and resolving the account IDs from a given domain name, if associated.
@@ -99,7 +71,7 @@ Domains can have many types of data associated with them; the most common is cry
 
 #### Method:
 
-`resolveSLD(domain: string): Promise<string | undefined>`
+`resolveSLD(domain: string): Promise<string>`
 
 #### Parameter:
 
@@ -108,6 +80,14 @@ Domains can have many types of data associated with them; the most common is cry
 #### Return:
 
 `Promise<string | undefined>`: If the specified domain name resolves to an account ID, the account ID will be returned. If it does not resolve to an account ID, `undefined` is returned.
+
+##### Errors:
+
+`new Error('Unable to query')`: Was unable to query at the time, try again later or report the issue
+
+`new Error('No Contract Address')`: The Json RPC wasn't able to find contract information
+
+`new Error(Not a valid domain)`: The input domain is not valid
 
 #### Example:
 
@@ -141,9 +121,9 @@ You will need to know the domain name, Hedera transaction ID, or the name hash i
 
 `new Error('Invalid Input')`: The parameter is formatted incorrectly or incompatible
 
-`new Error('Unable to find metadata')`: The parameter is not yet registered
-
 `new Error('No Contract Address')`; The Json RPC wasn't able to find contract information
+
+`new Error('Unable to query')`: Was unable to query at the time, try again later or report the issue
 
 #### Example:
 
@@ -153,38 +133,41 @@ const res = await resolver.getDomainInfo(`hns.hbar`);
 // {}
 ```
 
-### `Resolver.getBlackList`
+### Resolving Domains from Account IDs
+
+HNS supports reverse resolution to all applications to display HNS names in place of Hedera Account IDs or other data associated with the HNS name(s).
+
+> HNS does not enforce the accuracy of reverse records - for instance, anyone may claim that the name for their address is `hns.hbar`. To be certain that the claim is correct, you must always perform the reverse resolution and render the returned value(s).
+
+#### `Resolver.getAllDomainsForAccount`
 
 #### Method:
 
-`getBlackList(): Promise<DomainInfo[]>`
+`getAllDomainsForAccount(accountId: string): Promise<IndexerDomainInfo[] | Record<string, string>[]>`
+
+#### Parameter:
+
+`accountId: string`: A Hedera Account ID in the format of `0.0.<Account>`. Read the docs on [Hedera Account IDs](https://docs.hedera.com/hedera/core-concepts/accounts/account-properties#account-id) for more info.
 
 #### Return:
 
-`Promise<DomainInfo[]>`: An array of domains that are restricted, and shouldn't be able to be sold or traded.
+`Promise<IndexerDomainInfo[] | Record<string, string>[]>`: An array of domains that the the specified `accountId` owns or maps to. The method will return an empty array the `accountId` does not own or resolve to any domains.
+
+##### Errors:
+
+`new Error('Unable to query')`: Was unable to query at the time, try again later or report the issue
 
 #### Example:
 
 ```javascript
 // Initialize the resolver
-const res = await resolver.getBlackList();
- [
-    {
-        transactionId: '1707334280.338577662',
-        nameHash: {
-            domain: 'token.hbar',
-            tldHash: 'f861eb72cf942a90b9f6cfa87c4988a5cbeb2d9f48e5365bd88dbf63091584dc',
-            sldHash: '6fdf284cdf2eb1e636024067437d76d9535a58dfc84c69c4f4eb5948af7ed23d'
-        },
-        nftId: '0.0.1234197:19814',
-        expiration: 1738870318000,
-        provider: 'HNS',
-        providerData: { contractId: '0.0.3819952' },
-        accountId: '0.0.680340'
-    },
-  ...
-  ]
+const res = await resolver.getAllDomainsForAccount(`0.0.800`);
+// []
 ```
+
+### Domain's Metadata
+
+HNS domains have metadata (i.e., saving users' Twitter usernames, Reddit usernames, etc.) to provide more information for users. This will return metadata that is visible in the app in a JSON object.
 
 ### `Resolver.getDomainMetaData`
 
@@ -198,7 +181,7 @@ const res = await resolver.getBlackList();
 
 ##### Errors:
 
-`new Error(Unable to find domain's metadata)`: Unable to fetch profile metadata
+`new Error(Unable to find domain's profile metadata)`: Unable to fetch profile metadata
 
 #### Example:
 
@@ -222,4 +205,45 @@ const res = await resolver.getDomainMetaData("3yrs.cream");
   telegram: '',
   extras: ''
 }
+```
+
+### Blacklisted Domains
+
+HNS has observed cases of duplicate domains, where there should strictly be only one valid (non-expired) domain in the ecosystem at any given time. To counteract this, the system will list the domains and account IDs related to duplicate domains.
+
+### `Resolver.getBlackList`
+
+#### Method:
+
+`getBlackList(): Promise<DomainInfo[]>`
+
+#### Return:
+
+`Promise<DomainInfo[]>`: An array of domains that are restricted, and shouldn't be able to be sold or traded.
+
+##### Errors:
+
+`new Error('Unable to fetch blacklist')`: Was unable to query at the time, try again later
+
+#### Example:
+
+```javascript
+// Initialize the resolver
+const res = await resolver.getBlackList();
+ [
+    {
+        transactionId: '1707334280.338577662',
+        nameHash: {
+            domain: 'token.hbar',
+            tldHash: 'f861eb72cf942a90b9f6cfa87c4988a5cbeb2d9f48e5365bd88dbf63091584dc',
+            sldHash: '6fdf284cdf2eb1e636024067437d76d9535a58dfc84c69c4f4eb5948af7ed23d'
+        },
+        nftId: '0.0.1234197:19814',
+        expiration: 1738870318000,
+        provider: 'HNS',
+        providerData: { contractId: '0.0.3819952' },
+        accountId: '0.0.680340'
+    },
+  ...
+  ]
 ```
