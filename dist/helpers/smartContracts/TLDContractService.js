@@ -4,15 +4,15 @@ exports.TLDContractService = void 0;
 const HNSContractService_1 = require("./HNSContractService");
 class TLDContractService extends HNSContractService_1.HNSContractService {
     async getNodes() {
-        const nodes = await this.contract.methods.getNodes().call();
+        const nodes = await this.contract.getNodes();
         return nodes;
     }
     async getNumNodes() {
-        const nodeNumber = await this.contract.methods.getNumNodes().call();
+        const nodeNumber = await this.contract.getNumNodes();
         return Number(nodeNumber);
     }
     async getSLDNode(sldHash, start, stop) {
-        const node = await this.contract.methods.getSerial(sldHash, start, stop).call();
+        const node = await this.contract.getSerial(sldHash, start, stop);
         return node;
     }
 }

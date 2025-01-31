@@ -1,16 +1,17 @@
-import Web3 from "web3";
+import { ethers } from "ethers";
 
 export class JsonRpcService {
     contractAddr: string;
     abi: any;
     providerString: string;
-    provider: any; // to-do ethers provider type
-    contract: any; // to-do ethers type
+    provider: ethers.JsonRpcProvider;
+    contract: ethers.Contract;
+
     constructor(contractAddr: string, abi: any, providerString: string) {
         this.contractAddr = contractAddr;
-        this.providerString = providerString;
-        this.provider = new Web3(new Web3.providers.HttpProvider(this.providerString));
         this.abi = abi;
-        this.contract = new this.provider.eth.Contract(abi, contractAddr);
+        this.providerString = providerString;
+        this.provider = new ethers.JsonRpcProvider(this.providerString);
+        this.contract = new ethers.Contract(this.contractAddr, this.abi, this.provider);
     }
 }

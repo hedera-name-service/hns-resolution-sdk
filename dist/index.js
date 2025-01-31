@@ -94,22 +94,23 @@ class Resolver {
         throw new Error(`Unable to query`);
     }
     async getAllDomainsForAccount(accountId) {
-        const health = await this.indexerApi.getIndexerHealth();
         try {
-            if (health) {
-                const domains = await this.indexerApi.getAllDomainsAccount(accountId);
-                return domains.data;
+            if (Array.isArray(accountId)) {
+                const domains = await Promise.all(accountId.map((id) => this.indexerApi.getAllDomainsAccount(id)));
+                // Returning as Record<string, IndexerDomainInfo[]>
+                return accountId.reduce((acc, id, index) => {
+                    acc[id] = domains[index].data;
+                    return acc;
+                }, {});
             }
             else {
-                const fallback = await this.fallBackResolver.fallBackGetAllDomainsForAccount(accountId);
-                if (fallback)
-                    return fallback;
+                const domains = await this.indexerApi.getAllDomainsAccount(accountId);
+                return domains.data;
             }
         }
         catch (error) {
             return [];
         }
-        throw new Error(`Unable to query`);
     }
     async getDomainMetaData(domain) {
         try {
