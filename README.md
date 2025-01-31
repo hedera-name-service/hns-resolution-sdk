@@ -143,7 +143,7 @@ HNS supports reverse resolution to all applications to display HNS names in plac
 
 #### Method:
 
-`getAllDomainsForAccount(accountId: string): Promise<IndexerDomainInfo[] | Record<string, string>[]>`
+`getAllDomainsForAccount(accountId: string[] | string): Promise<IndexerDomainInfo[] | Record<string, IndexerDomainInfo[]>[]>`
 
 #### Parameter:
 
@@ -151,7 +151,7 @@ HNS supports reverse resolution to all applications to display HNS names in plac
 
 #### Return:
 
-`Promise<IndexerDomainInfo[] | Record<string, string>[]>`: An array of domains that the the specified `accountId` owns or maps to. The method will return an empty array the `accountId` does not own or resolve to any domains.
+`Promise<IndexerDomainInfo[] | Record<string, IndexerDomainInfo[]>[]>`: An array of domains that the the specified `accountId` or array of `accountId` owns or maps to. The method will return an empty array the `accountId` does not own or resolve to any domains.
 
 ##### Errors:
 
@@ -163,6 +163,12 @@ HNS supports reverse resolution to all applications to display HNS names in plac
 // Initialize the resolver
 const res = await resolver.getAllDomainsForAccount(`0.0.800`);
 // []
+```
+
+```javascript
+// Initialize the resolver
+const res = await resolver.getAllDomainsForAccount([`0.0.800`, `0.0.801`]);
+// {"0.0.800":[...]}
 ```
 
 ### Domain's Metadata

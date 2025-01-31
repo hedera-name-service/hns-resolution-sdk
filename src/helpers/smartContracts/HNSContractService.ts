@@ -2,7 +2,7 @@ import { JsonRpcService } from "./JsonRpcService";
 
 export class HNSContractService extends JsonRpcService {
     async getMaxRecords() {
-        const nodes = await this.contract.methods.getNodes().call();
+        const nodes = await this.contract.getNodes();
         return Number(nodes);
     }
 }

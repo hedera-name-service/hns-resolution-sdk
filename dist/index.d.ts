@@ -16,7 +16,7 @@ export declare class Resolver {
     constructor(networkType: NetworkType, configs?: ResolverConfigs);
     resolveSLD(domain: string): Promise<string | undefined>;
     getDomainInfo(domainOrNameHashOrTxId: NameHash | string): Promise<DomainInfo | undefined>;
-    getAllDomainsForAccount(accountId: string): Promise<IndexerDomainInfo[] | Record<string, string>[]>;
+    getAllDomainsForAccount(accountId: string | string[]): Promise<IndexerDomainInfo[] | Record<string, IndexerDomainInfo[]>>;
     getDomainMetaData(domain: string): Promise<MetadataType>;
     getBlackList(): Promise<DomainInfo[]>;
 }
