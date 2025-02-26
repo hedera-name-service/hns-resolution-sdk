@@ -94,23 +94,22 @@ class Resolver {
         throw new Error(`Unable to query`);
     }
     async getAllDomainsForAccount(accountId) {
+        const health = await this.indexerApi.getIndexerHealth();
         try {
-            if (Array.isArray(accountId)) {
-                const domains = await Promise.all(accountId.map((id) => this.indexerApi.getAllDomainsAccount(id)));
-                // Returning as Record<string, IndexerDomainInfo[]>
-                return accountId.reduce((acc, id, index) => {
-                    acc[id] = domains[index].data;
-                    return acc;
-                }, {});
-            }
-            else {
+            if (health) {
                 const domains = await this.indexerApi.getAllDomainsAccount(accountId);
                 return domains.data;
+            }
+            else {
+                const fallback = await this.fallBackResolver.fallBackGetAllDomainsForAccount(accountId);
+                if (fallback)
+                    return fallback;
             }
         }
         catch (error) {
             return [];
         }
+        throw new Error(`Unable to query`);
     }
     async getDomainMetaData(domain) {
         try {
@@ -150,6 +149,15 @@ class Resolver {
         }
         catch (error) {
             throw new Error(`Unable to fetch blacklist`);
+        }
+    }
+    async getDefaultName(accountId) {
+        try {
+            const defaultName = await this.indexerApi.getDefaultName(accountId);
+            return defaultName.data;
+        }
+        catch (error) {
+            return undefined;
         }
     }
 }

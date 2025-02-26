@@ -32,5 +32,9 @@ class Indexer {
         const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/account/${accountId}`);
         return res;
     }
+    async getDefaultName(accountId) {
+        const res = await (0, axiosCall_1.sendAxiosGetRequest)(`${this.url}/slds/default-name/${accountId}`);
+        return res;
+    }
 }
 exports.Indexer = Indexer;

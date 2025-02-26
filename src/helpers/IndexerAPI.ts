@@ -1,5 +1,6 @@
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { DOMAIN_EP_MAIN, DOMAIN_EP_TEST } from "../environmentsVariable/environmentsVariable";
+import { DefaultName } from "../types/DefaultName";
 import { IndexerBlackList, IndexerDomainInfo, IndexerMetaData } from "../types/IndexerTypes";
 import { NetworkType } from "../types/NetworkType";
 import { sendAxiosGetRequest } from "../util/axiosCall";
@@ -35,6 +36,10 @@ export class Indexer {
         accountId: string,
     ): Promise<AxiosResponse<IndexerDomainInfo[] | []>> {
         const res = await sendAxiosGetRequest(`${this.url}/slds/account/${accountId}`);
+        return res;
+    }
+    async getDefaultName(accountId: string): Promise<AxiosResponse<DefaultName>> {
+        const res = await sendAxiosGetRequest(`${this.url}/slds/default-name/${accountId}`);
         return res;
     }
 }

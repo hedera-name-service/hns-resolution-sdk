@@ -2,6 +2,7 @@ import { HASHIO_MAINNET, HASHIO_TESTNET } from "./environmentsVariable/environme
 import { FallBackResolver } from "./helpers/FallbackLogic/FallBackResolver";
 import { Indexer } from "./helpers/IndexerAPI";
 import { MirrorNode } from "./helpers/MirrorNode";
+import { DefaultName } from "./types/DefaultName";
 import { DomainInfo } from "./types/DomainInfo";
 import { IndexerDomainInfo } from "./types/IndexerTypes";
 import { MetadataType } from "./types/Metadata";
@@ -107,28 +108,24 @@ export class Resolver {
         throw new Error(`Unable to query`);
     }
     public async getAllDomainsForAccount(
-        accountId: string | string[],
-    ): Promise<IndexerDomainInfo[] | Record<string, IndexerDomainInfo[]>> {
+        accountId: string,
+    ): Promise<IndexerDomainInfo[] | Record<string, string>[]> {
+        const health = await this.indexerApi.getIndexerHealth();
+
         try {
-            if (Array.isArray(accountId)) {
-                const domains = await Promise.all(
-                    accountId.map((id) => this.indexerApi.getAllDomainsAccount(id)),
-                );
-                // Returning as Record<string, IndexerDomainInfo[]>
-                return accountId.reduce(
-                    (acc, id, index) => {
-                        acc[id] = domains[index].data;
-                        return acc;
-                    },
-                    {} as Record<string, IndexerDomainInfo[]>,
-                );
-            } else {
+            if (health) {
                 const domains = await this.indexerApi.getAllDomainsAccount(accountId);
                 return domains.data;
+            } else {
+                const fallback =
+                    await this.fallBackResolver.fallBackGetAllDomainsForAccount(accountId);
+                if (fallback) return fallback;
             }
         } catch (error) {
             return [];
         }
+
+        throw new Error(`Unable to query`);
     }
     public async getDomainMetaData(domain: string): Promise<MetadataType> {
         try {
@@ -168,6 +165,14 @@ export class Resolver {
             return payload;
         } catch (error) {
             throw new Error(`Unable to fetch blacklist`);
+        }
+    }
+    public async getDefaultName(accountId: string): Promise<DefaultName | undefined> {
+        try {
+            const defaultName = await this.indexerApi.getDefaultName(accountId);
+            return defaultName.data;
+        } catch (error) {
+            return undefined;
         }
     }
 }

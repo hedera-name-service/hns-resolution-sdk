@@ -143,7 +143,7 @@ HNS supports reverse resolution to all applications to display HNS names in plac
 
 #### Method:
 
-`getAllDomainsForAccount(accountId: string[] | string): Promise<IndexerDomainInfo[] | Record<string, IndexerDomainInfo[]>[]>`
+`getAllDomainsForAccount(accountId: string): Promise<IndexerDomainInfo[] | Record<string, string>[]>`
 
 #### Parameter:
 
@@ -151,7 +151,7 @@ HNS supports reverse resolution to all applications to display HNS names in plac
 
 #### Return:
 
-`Promise<IndexerDomainInfo[] | Record<string, IndexerDomainInfo[]>[]>`: An array of domains that the the specified `accountId` or array of `accountId` owns or maps to. The method will return an empty array the `accountId` does not own or resolve to any domains.
+`Promise<IndexerDomainInfo[] | Record<string, string>[]>`: An array of domains that the the specified `accountId`. The method will return an empty array the `accountId` does not own or resolve to any domains.
 
 ##### Errors:
 
@@ -163,12 +163,6 @@ HNS supports reverse resolution to all applications to display HNS names in plac
 // Initialize the resolver
 const res = await resolver.getAllDomainsForAccount(`0.0.800`);
 // []
-```
-
-```javascript
-// Initialize the resolver
-const res = await resolver.getAllDomainsForAccount([`0.0.800`, `0.0.801`]);
-// {"0.0.800":[...]}
 ```
 
 ### Domain's Metadata
@@ -252,4 +246,35 @@ const res = await resolver.getBlackList();
     },
   ...
   ]
+```
+
+### Default Name
+
+HNS is now enabling user to select a default name (primary name simillar to ENS), where user can set a decdicated domain to their account.
+
+### `Resolver.getDefaultName`
+
+#### Method:
+
+`getDefaultName(accountId: string): Promise<DefaultName | undefined> `
+
+#### Return:
+
+` Promise<DefaultName | undefined>`: Will return an object with account Id and domain or undefined if user doesn't have one.
+
+##### Errors:
+
+`undefined`: Doesn't have a default name.
+
+#### Example:
+
+```javascript
+// Initialize the resolver
+const res = await resolver.getDefaultName("0.0.422755");
+
+    {
+        accountId: '0.0.422755',
+        domain: 'testing.cream'
+    },
+
 ```
